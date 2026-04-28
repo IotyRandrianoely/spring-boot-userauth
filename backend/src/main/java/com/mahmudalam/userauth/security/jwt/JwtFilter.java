@@ -37,7 +37,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
+            try {
+                username = jwtService.extractUsername(token);
+            } catch (Exception ignored) {
+                // Ignore invalid/expired tokens here; protected routes will still be denied by security rules.
+                SecurityContextHolder.clearContext();
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
